@@ -61,15 +61,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: your-org/shared-actions/setup-ssh@main
+      - uses: RabbahSystems/rabbah-actions-library/setup-ssh@main
         with:
           ssh_private_key: ${{ secrets.SSH_PRIVATE_KEY }}
 
-      - uses: your-org/shared-actions/setup-ansible@main
+      - uses: RabbahSystems/rabbah-actions-library/setup-ansible@main
 
       - name: Configure Ansible
         id: ansible_config
-        uses: your-org/shared-actions/configure-ansible@main
+        uses: RabbahSystems/rabbah-actions-library/configure-ansible@main
         with:
           hosts: webservers
           inventory: inventory/hosts.yml
@@ -87,7 +87,7 @@ jobs:
 ```yaml
 - name: Configure Ansible with Full Control
   id: ansible_config
-  uses: your-org/shared-actions/configure-ansible@main
+  uses: RabbahSystems/rabbah-actions-library/configure-ansible@main
   with:
     hosts: all
     inventory: inventory/production.yml
@@ -115,7 +115,7 @@ jobs:
 ```yaml
 - name: Quick Ansible Setup
   id: ansible_config
-  uses: your-org/shared-actions/configure-ansible@main
+  uses: RabbahSystems/rabbah-actions-library/configure-ansible@main
   with:
     hosts: localhost
     inventory: inventory/local.yml
@@ -135,7 +135,7 @@ jobs:
 ```yaml
 - name: Configure Ansible
   id: ansible_config
-  uses: your-org/shared-actions/configure-ansible@main
+  uses: RabbahSystems/rabbah-actions-library/configure-ansible@main
   with:
     hosts: databases
     inventory: inventory/prod.yml
@@ -166,15 +166,15 @@ jobs:
 
 ```yaml
 - name: Setup SSH and Ansible
-  uses: your-org/shared-actions/setup-ssh@main
+  uses: RabbahSystems/rabbah-actions-library/setup-ssh@main
   with:
     ssh_private_key: ${{ secrets.SSH_PRIVATE_KEY }}
 
-- uses: your-org/shared-actions/setup-ansible@main
+- uses: RabbahSystems/rabbah-actions-library/setup-ansible@main
 
 - name: Configure for AWS Dynamic Inventory
   id: ansible_config
-  uses: your-org/shared-actions/configure-ansible@main
+  uses: RabbahSystems/rabbah-actions-library/configure-ansible@main
   with:
     hosts: "tag_Environment_production"
     inventory: inventory/aws_ec2.yml
@@ -194,7 +194,7 @@ jobs:
 ```yaml
 - name: Configure Ansible
   id: ansible_config
-  uses: your-org/shared-actions/configure-ansible@main
+  uses: RabbahSystems/rabbah-actions-library/configure-ansible@main
   with:
     hosts: ${{ inputs.environment }}-servers
     inventory: inventory/${{ inputs.environment }}.yml
@@ -259,7 +259,7 @@ A formatted markdown table with your configuration appears in the workflow summa
 ```yaml
 - name: Configure Ansible
   id: ansible_config # This ID is required!
-  uses: your-org/shared-actions/configure-ansible@main
+  uses: RabbahSystems/rabbah-actions-library/configure-ansible@main
 ```
 
 Then reference outputs using: `${{ steps.ansible_config.outputs.flag_name }}`
@@ -318,7 +318,7 @@ test_connectivity: false
 ```yaml
 - name: Configure Ansible and Run Pre-flight Checks
   id: ansible_config
-  uses: your-org/shared-actions/configure-ansible@main
+  uses: RabbahSystems/rabbah-actions-library/configure-ansible@main
   with:
     hosts: ${{ inputs.hosts }}
     inventory: inventory/hosts.yml
