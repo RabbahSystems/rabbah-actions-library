@@ -1,0 +1,15 @@
+name: Setup DigitalOcean Token
+description: Decode and export DigitalOcean API token
+
+inputs:
+  encoded_token:
+    description: "Base64 encoded DigitalOcean API token"
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Export DO Token
+      shell: bash
+      run: |
+        echo "DO_API_TOKEN=$(echo '${{ inputs.encoded_token }}' | base64 -d)" >> $GITHUB_ENV
