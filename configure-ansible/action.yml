@@ -38,6 +38,10 @@ outputs:
 runs:
   using: "composite"
   steps:
+    - name: Export DigitalOcean API Token
+      shell: bash
+      run: echo "${{ secrets.DO_API_TOKEN }}" | base64 -d >> $GITHUB_ENV
+
     - name: Configure Ansible Options
       id: configure
       shell: bash
