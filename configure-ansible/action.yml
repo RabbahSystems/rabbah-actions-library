@@ -101,7 +101,7 @@ runs:
         # Group output for better visibility
         echo "::group::📦 Ansible Configuration Summary"
         echo "Target Hosts: ${{ inputs.hosts }}"
-        echo "Inventory: inventory/${{ inputs.inventory }}"
+        echo "Inventory: ${{ inputs.inventory }}"
         echo "Limit: ${{ inputs.limit || 'none' }}"
         echo "Verbosity: ${{ inputs.verbosity || 'normal' }}"
         echo "Dry Run: ${{ inputs.dry_run }}"
@@ -119,7 +119,7 @@ runs:
         echo "║           Ansible Run Configuration                  ║"
         echo "╠══════════════════════════════════════════════════════╣"
         printf "║ %-20s : %-30s ║\n" "Target Hosts" "${{ inputs.hosts }}"
-        printf "║ %-20s : %-30s ║\n" "Inventory" "inventory/${{ inputs.inventory }}"
+        printf "║ %-20s : %-30s ║\n" "Inventory" "${{ inputs.inventory }}"
         printf "║ %-20s : %-30s ║\n" "Limit" "${{ inputs.limit || '(none)' }}"
         printf "║ %-20s : %-30s ║\n" "Verbosity" "${{ inputs.verbosity || 'Normal' }}"
         printf "║ %-20s : %-30s ║\n" "Dry Run" "${{ inputs.dry_run }}"
@@ -134,7 +134,7 @@ runs:
         echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
         # Check if inventory file exists
-        if [ ! -f "inventory/${{ inputs.inventory }}" ]; then
+        if [ ! -f "${{ inputs.inventory }}" ]; then
           echo "::error title=Inventory Error::Inventory file not found: ${{ inputs.inventory }}"
           exit 1
         fi
@@ -144,7 +144,7 @@ runs:
 
         # List hosts that will be targeted
         echo "Hosts that will be targeted:"
-        ansible-inventory -i inventory/${{ inputs.inventory }} \
+        ansible-inventory -i ${{ inputs.inventory }} \
           --list \
           --yaml \
           $LIMIT_FLAG | head -50
@@ -153,7 +153,7 @@ runs:
 
         # Count hosts
         if command -v jq &> /dev/null; then
-          HOST_COUNT=$(ansible-inventory -i inventory/${{ inputs.inventory }} --list $LIMIT_FLAG | jq -r '._meta.hostvars | keys | length')
+          HOST_COUNT=$(ansible-inventory -i ${{ inputs.inventory }} --list $LIMIT_FLAG | jq -r '._meta.hostvars | keys | length')
           echo "📊 Total hosts to be processed: $HOST_COUNT"
           
           # Add annotation with host count
@@ -174,7 +174,7 @@ runs:
 
         # Run ping module with timeout
         ansible ${{ inputs.hosts }} \
-          -i inventory/${{ inputs.inventory }} \
+          -i ${{ inputs.inventory }} \
           $LIMIT_FLAG \
           -m ping \
           -o \
@@ -201,7 +201,7 @@ runs:
         | Parameter | Value |
         |-----------|-------|
         | **Target Hosts** | `${{ inputs.hosts }}` |
-        | **Inventory** | `inventory/${{ inputs.inventory }}` |
+        | **Inventory** | `${{ inputs.inventory }}` |
         | **Limit** | `${{ inputs.limit || 'none' }}` |
         | **Verbosity** | `${{ inputs.verbosity || 'normal' }}` |
         | **Dry Run** | `${{ inputs.dry_run }}` |
@@ -214,7 +214,7 @@ runs:
         ### Usage Example
         ```bash
         ansible-playbook playbook.yml \
-          -i inventory/${{ inputs.inventory }} \
+          -i ${{ inputs.inventory }} \
           --extra-vars "hosts=${{ inputs.hosts }}" \
           ${{ steps.configure.outputs.all_flags }}
         ```
