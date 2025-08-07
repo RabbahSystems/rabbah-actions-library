@@ -43,7 +43,7 @@ runs:
   steps:
     - name: Export DigitalOcean API Token
       shell: bash
-      run: echo "DO_API_TOKEN=${{ inputs.do_api_token }}" | base64 -d >> $GITHUB_ENV
+      run: echo "DO_API_TOKEN=$(echo ${{ inputs.do_api_token }} | base64 -d)" >> $GITHUB_ENV
 
     - name: Configure Ansible Options
       id: configure
