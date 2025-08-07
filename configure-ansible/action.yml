@@ -1,0 +1,216 @@
+name: Configure Ansible Execution
+description: Configure Ansible execution parameters and perform pre-flight checks
+
+inputs:
+  hosts:
+    description: "Target hosts or host group"
+    required: true
+  inventory:
+    description: "Path to Ansible inventory file"
+    required: true
+  limit:
+    description: "Limit execution to specific hosts (optional)"
+    required: false
+    default: ""
+  verbosity:
+    description: "Ansible verbosity level (-v, -vv, -vvv, -vvvv)"
+    required: false
+    default: ""
+  dry_run:
+    description: "Run in check mode (true/false)"
+    required: false
+    default: "false"
+
+outputs:
+  limit_flag:
+    description: "The limit flag for ansible commands"
+    value: ${{ steps.configure.outputs.limit_flag }}
+  verbosity_flag:
+    description: "The verbosity flag for ansible commands"
+    value: ${{ steps.configure.outputs.verbosity_flag }}
+  check_flag:
+    description: "The check mode flag for ansible commands"
+    value: ${{ steps.configure.outputs.check_flag }}
+  all_flags:
+    description: "All ansible options combined"
+    value: ${{ steps.configure.outputs.all_flags }}
+
+runs:
+  using: "composite"
+  steps:
+    - name: Configure Ansible Options
+      id: configure
+      shell: bash
+      run: |
+        # GitHub Actions Annotations - These appear as special messages in the UI
+        echo "::notice title=Ansible Configuration::Starting Ansible configuration for hosts: ${{ inputs.hosts }}"
+
+        echo "🔧 Configuring Ansible execution parameters..."
+
+        # Initialize options array
+        declare -a OPTIONS=()
+
+        # Configure limit flag
+        if [ -n "${{ inputs.limit }}" ]; then
+          LIMIT_FLAG="--limit ${{ inputs.limit }}"
+          OPTIONS+=("$LIMIT_FLAG")
+          echo "limit_flag=$LIMIT_FLAG" >> $GITHUB_OUTPUT
+          echo "  ✓ Limit configured: ${{ inputs.limit }}"
+          
+          # GitHub Actions annotation - appears in the UI
+          echo "::notice::Limiting execution to: ${{ inputs.limit }}"
+        else
+          echo "limit_flag=" >> $GITHUB_OUTPUT
+          echo "  ✓ No limit specified (all hosts)"
+        fi
+
+        # Configure verbosity
+        if [ -n "${{ inputs.verbosity }}" ]; then
+          VERBOSITY_FLAG="${{ inputs.verbosity }}"
+          OPTIONS+=("$VERBOSITY_FLAG")
+          echo "verbosity_flag=$VERBOSITY_FLAG" >> $GITHUB_OUTPUT
+          echo "  ✓ Verbosity level: ${{ inputs.verbosity }}"
+        else
+          echo "verbosity_flag=" >> $GITHUB_OUTPUT
+          echo "  ✓ Verbosity: normal"
+        fi
+
+        # Configure check mode
+        if [ "${{ inputs.dry_run }}" = "true" ]; then
+          CHECK_FLAG="--check"
+          OPTIONS+=("$CHECK_FLAG")
+          echo "check_flag=$CHECK_FLAG" >> $GITHUB_OUTPUT
+          echo "  ✓ Check mode: ENABLED (dry run)"
+          
+          # GitHub Actions warning - appears prominently
+          echo "::warning title=Dry Run Mode::This is a DRY RUN - no changes will be made to the systems"
+        else
+          echo "check_flag=" >> $GITHUB_OUTPUT
+          echo "  ✓ Check mode: disabled (will make changes)"
+        fi
+
+        # Combine all options
+        ALL_FLAGS="${OPTIONS[@]}"
+        echo "all_flags=$ALL_FLAGS" >> $GITHUB_OUTPUT
+
+        # Group output for better visibility
+        echo "::group::📦 Ansible Configuration Summary"
+        echo "Target Hosts: ${{ inputs.hosts }}"
+        echo "Inventory: ${{ inputs.inventory }}"
+        echo "Limit: ${{ inputs.limit || 'none' }}"
+        echo "Verbosity: ${{ inputs.verbosity || 'normal' }}"
+        echo "Dry Run: ${{ inputs.dry_run }}"
+        echo "Combined Flags: $ALL_FLAGS"
+        echo "::endgroup::"
+
+        echo "✅ Configuration complete!"
+
+    - name: Display Run Configuration
+      shell: bash
+      run: |
+        # This creates a collapsible group in the GitHub Actions log
+        echo "::group::📋 Detailed Configuration"
+        echo "╔══════════════════════════════════════════════════════╗"
+        echo "║           Ansible Run Configuration                  ║"
+        echo "╠══════════════════════════════════════════════════════╣"
+        printf "║ %-20s : %-30s ║\n" "Target Hosts" "${{ inputs.hosts }}"
+        printf "║ %-20s : %-30s ║\n" "Inventory" "${{ inputs.inventory }}"
+        printf "║ %-20s : %-30s ║\n" "Limit" "${{ inputs.limit || '(none)' }}"
+        printf "║ %-20s : %-30s ║\n" "Verbosity" "${{ inputs.verbosity || 'Normal' }}"
+        printf "║ %-20s : %-30s ║\n" "Dry Run" "${{ inputs.dry_run }}"
+        echo "╚══════════════════════════════════════════════════════╝"
+        echo "::endgroup::"
+
+    - name: Verify Ansible Inventory
+      shell: bash
+      run: |
+        echo "::group::📋 Inventory Verification"
+        echo "Verifying Ansible inventory..."
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+
+        # Check if inventory file exists
+        if [ ! -f "${{ inputs.inventory }}" ]; then
+          echo "::error title=Inventory Error::Inventory file not found: ${{ inputs.inventory }}"
+          exit 1
+        fi
+
+        # Use the limit flag from outputs
+        LIMIT_FLAG="${{ steps.configure.outputs.limit_flag }}"
+
+        # List hosts that will be targeted
+        echo "Hosts that will be targeted:"
+        ansible-inventory -i ${{ inputs.inventory }} \
+          --list \
+          --yaml \
+          $LIMIT_FLAG | head -50
+
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+
+        # Count hosts
+        if command -v jq &> /dev/null; then
+          HOST_COUNT=$(ansible-inventory -i ${{ inputs.inventory }} --list $LIMIT_FLAG | jq -r '._meta.hostvars | keys | length')
+          echo "📊 Total hosts to be processed: $HOST_COUNT"
+          
+          # Add annotation with host count
+          echo "::notice title=Host Count::Will process $HOST_COUNT hosts"
+        fi
+        echo "::endgroup::"
+
+    - name: Test Connectivity
+      shell: bash
+      run: |
+        echo "::group::🔌 Connectivity Test"
+        echo "Testing connectivity to hosts..."
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+
+        # Use the flags from outputs
+        LIMIT_FLAG="${{ steps.configure.outputs.limit_flag }}"
+        VERBOSITY_FLAG="${{ steps.configure.outputs.verbosity_flag }}"
+
+        # Run ping module with timeout
+        ansible ${{ inputs.hosts }} \
+          -i ${{ inputs.inventory }} \
+          $LIMIT_FLAG \
+          -m ping \
+          -o \
+          --timeout 10 \
+          $VERBOSITY_FLAG || {
+            EXIT_CODE=$?
+            echo "::warning::Some hosts are unreachable (exit code: $EXIT_CODE). This may be expected for new hosts."
+            echo "⚠️  Some hosts are unreachable"
+            echo "This may be expected for new hosts. Continuing..."
+        }
+
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        echo "✅ Connectivity check complete"
+        echo "::endgroup::"
+
+    - name: Write Job Summary
+      shell: bash
+      run: |
+        # This appears in the Summary tab of the GitHub Actions run
+        cat >> $GITHUB_STEP_SUMMARY << 'EOF'
+        ## 🎯 Ansible Configuration
+
+        ### Configuration Details
+        | Parameter | Value |
+        |-----------|-------|
+        | **Target Hosts** | `${{ inputs.hosts }}` |
+        | **Inventory** | `${{ inputs.inventory }}` |
+        | **Limit** | `${{ inputs.limit || 'none' }}` |
+        | **Verbosity** | `${{ inputs.verbosity || 'normal' }}` |
+        | **Dry Run** | `${{ inputs.dry_run }}` |
+
+        ### Generated Flags
+        ```bash
+        ${{ steps.configure.outputs.all_flags }}
+        ```
+
+        ### Usage Example
+        ```bash
+        ansible-playbook playbook.yml \
+          -i ${{ inputs.inventory }} \
+          --extra-vars "hosts=${{ inputs.hosts }}" \
+          ${{ steps.configure.outputs.all_flags }}
+        ```
+        EOF
