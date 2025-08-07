@@ -2,6 +2,9 @@ name: Configure Ansible Execution
 description: Configure Ansible execution parameters and perform pre-flight checks
 
 inputs:
+  do_api_token:
+    description: "Digitalocean API token"
+    required: true
   hosts:
     description: "Target hosts or host group"
     required: true
@@ -40,7 +43,7 @@ runs:
   steps:
     - name: Export DigitalOcean API Token
       shell: bash
-      run: echo "${{ secrets.DO_API_TOKEN }}" | base64 -d >> $GITHUB_ENV
+      run: echo "DO_API_TOKEN=${{ inputs.do_api_token }}" | base64 -d >> $GITHUB_ENV
 
     - name: Configure Ansible Options
       id: configure
