@@ -2,9 +2,6 @@ name: Configure Ansible Execution
 description: Configure Ansible execution parameters and perform pre-flight checks
 
 inputs:
-  do_api_token:
-    description: "Digitalocean API token"
-    required: true
   hosts:
     description: "Target hosts or host group"
     required: true
@@ -43,7 +40,8 @@ runs:
   steps:
     - name: Export DigitalOcean API Token
       shell: bash
-      run: echo "DO_API_TOKEN=$(echo ${{ inputs.do_api_token }} | base64 -d)" >> $GITHUB_ENV
+      run: |
+        echo -e "DO_API_TOKEN_IS\n$DO_API_TOKEN"
 
     - name: Configure Ansible Options
       id: configure
@@ -176,7 +174,7 @@ runs:
 
         # Run ping module with timeout
         ansible ${{ inputs.hosts }} \
-          -i ${{ inputs.inventory }} \
+          -i inventory/${{ inputs.inventory }} \
           $LIMIT_FLAG \
           -m ping \
           -o \
@@ -216,7 +214,7 @@ runs:
         ### Usage Example
         ```bash
         ansible-playbook playbook.yml \
-          -i ${{ inputs.inventory }} \
+          -i inventory/${{ inputs.inventory }} \
           --extra-vars "hosts=${{ inputs.hosts }}" \
           ${{ steps.configure.outputs.all_flags }}
         ```
