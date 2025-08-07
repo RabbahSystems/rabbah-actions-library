@@ -1,0 +1,41 @@
+name: "Setup SSH Private Key"
+description: "Sets up SSH private key for deployment operations"
+inputs:
+  ssh_private_key:
+    description: "Base64 encoded SSH private key"
+    required: true
+  key_filename:
+    description: "SSH key filename"
+    required: false
+    default: "id_ed25519_deploy_admin"
+  strict_host_checking:
+    description: "Enable strict host key checking"
+    required: false
+    default: "no"
+
+runs:
+  using: "composite"
+  steps:
+    - name: Setup SSH Private Key
+      shell: bash
+      run: |
+        echo "Setting up SSH private key..."
+
+        # Create .ssh directory if it doesn't exist
+        mkdir -p "$HOME/.ssh"
+
+        # Decode and write the private key
+        echo "${{ inputs.ssh_private_key }}" | base64 -d > "$HOME/.ssh/${{ inputs.key_filename }}"
+        chmod 600 "$HOME/.ssh/${{ inputs.key_filename }}"
+
+        # Create SSH config
+        cat > "$HOME/.ssh/config" << EOF
+        Host *
+          IdentityFile ~/.ssh/${{ inputs.key_filename }}
+          StrictHostKeyChecking ${{ inputs.strict_host_checking }}
+        EOF
+        chmod 600 "$HOME/.ssh/config"
+
+        echo "✅ SSH key setup completed"
+        echo "Key file: ~/.ssh/${{ inputs.key_filename }}"
+        echo "StrictHostKeyChecking: ${{ inputs.strict_host_checking }}"
