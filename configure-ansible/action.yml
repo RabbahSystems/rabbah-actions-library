@@ -134,7 +134,7 @@ runs:
         echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
         # Check if inventory file exists
-        if [ ! -f "${{ inputs.inventory }}" ]; then
+        if [ ! -f "inventory/${{ inputs.inventory }}" ]; then
           echo "::error title=Inventory Error::Inventory file not found: ${{ inputs.inventory }}"
           exit 1
         fi
