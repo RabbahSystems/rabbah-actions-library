@@ -38,11 +38,6 @@ outputs:
 runs:
   using: "composite"
   steps:
-    - name: Export DigitalOcean API Token
-      shell: bash
-      run: |
-        echo -e "DO_API_TOKEN_IS\n$DO_API_TOKEN"
-
     - name: Configure Ansible Options
       id: configure
       shell: bash
@@ -162,60 +157,56 @@ runs:
         echo "::endgroup::"
 
     - name: Test Connectivity
+      id: connectivity
+      if: inputs.test_connectivity == 'true'
       shell: bash
       run: |
-        echo "::group::🔌 Connectivity Test"
-        echo "Testing connectivity to hosts..."
-        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        echo "🔌 Testing connectivity to hosts..."
 
-        # Use the flags from outputs
         LIMIT_FLAG="${{ steps.configure.outputs.limit_flag }}"
         VERBOSITY_FLAG="${{ steps.configure.outputs.verbosity_flag }}"
 
         # Run ping module with timeout
-        ansible ${{ inputs.hosts }} \
+        if ansible ${{ inputs.hosts }} \
           -i ${{ inputs.inventory }} \
           $LIMIT_FLAG \
           -m ping \
           -o \
           --timeout 10 \
-          $VERBOSITY_FLAG || {
+          $VERBOSITY_FLAG; then
+            echo "✅ All hosts reachable"
+            echo "status=success" >> $GITHUB_OUTPUT
+        else
             EXIT_CODE=$?
-            echo "::warning::Some hosts are unreachable (exit code: $EXIT_CODE). This may be expected for new hosts."
-            echo "⚠️  Some hosts are unreachable"
-            echo "This may be expected for new hosts. Continuing..."
-        }
+            echo "⚠️  Some hosts unreachable (exit code: $EXIT_CODE)"
+            echo "status=partial" >> $GITHUB_OUTPUT
+        fi
 
-        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-        echo "✅ Connectivity check complete"
-        echo "::endgroup::"
-
-    - name: Write Job Summary
+    - name: Write Configuration Summary
       shell: bash
       run: |
-        # This appears in the Summary tab of the GitHub Actions run
-        cat >> $GITHUB_STEP_SUMMARY << 'EOF'
-        ## 🎯 Ansible Configuration
+        # Write ACTUAL JOB RESULTS to the summary, not instructions
+        cat >> $GITHUB_STEP_SUMMARY << EOF
+        ## 📋 Ansible Pre-flight Check Results
 
-        ### Configuration Details
-        | Parameter | Value |
-        |-----------|-------|
-        | **Target Hosts** | `${{ inputs.hosts }}` |
-        | **Inventory** | `${{ inputs.inventory }}` |
-        | **Limit** | `${{ inputs.limit || 'none' }}` |
-        | **Verbosity** | `${{ inputs.verbosity || 'normal' }}` |
-        | **Dry Run** | `${{ inputs.dry_run }}` |
+        ### ✅ Configuration Complete
 
-        ### Generated Flags
-        ```bash
-        ${{ steps.configure.outputs.all_flags }}
-        ```
+        | Check | Result |
+        |-------|--------|
+        | **Target Hosts** | \`${{ inputs.hosts }}\` |
+        | **Inventory File** | ✅ Found |
+        | **Hosts to Process** | ${{ steps.inventory_check.outputs.host_count || 'N/A' }} |
+        | **Connectivity** | ${{ steps.connectivity.outputs.status == 'success' && '✅ All reachable' || '⚠️ Some unreachable' }} |
+        | **Mode** | ${{ inputs.dry_run == 'true' && '🔍 DRY RUN (check mode)' || '⚡ LIVE (will make changes)' }} |
 
-        ### Usage Example
-        ```bash
-        ansible-playbook playbook.yml \
-          -i ${{ inputs.inventory }} \
-          --extra-vars "hosts=${{ inputs.hosts }}" \
-          ${{ steps.configure.outputs.all_flags }}
-        ```
+        ### 🎯 Applied Configuration
+
+        | Setting | Value |
+        |---------|-------|
+        | **Limit** | ${{ inputs.limit || 'None (all hosts)' }} |
+        | **Verbosity** | ${{ inputs.verbosity || 'Normal' }} |
+        | **Ansible Flags** | \`${{ steps.configure.outputs.all_flags || '(none)' }}\` |
+
+        ---
+
         EOF
