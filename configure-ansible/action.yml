@@ -8,6 +8,9 @@ inputs:
   inventory:
     description: "Path to Ansible inventory file"
     required: true
+  playbook:
+    description: "Playbook to run"
+    required: true
   limit:
     description: "Limit execution to specific hosts (optional)"
     required: false
@@ -195,6 +198,7 @@ runs:
         |-------|--------|
         | **Target Hosts** | \`${{ inputs.hosts }}\` |
         | **Inventory File** | ✅ Found |
+        | **Playbook** | \${{ inputs.playbook }}\ |
         | **Hosts to Process** | ${{ steps.inventory_check.outputs.host_count || 'N/A' }} |
         | **Connectivity** | ${{ steps.connectivity.outputs.status == 'success' && '✅ All reachable' || '⚠️ Some unreachable' }} |
         | **Mode** | ${{ inputs.dry_run == 'true' && '🔍 DRY RUN (check mode)' || '⚡ LIVE (will make changes)' }} |
