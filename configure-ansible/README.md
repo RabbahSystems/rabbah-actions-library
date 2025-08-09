@@ -23,6 +23,7 @@ This composite action handles all the repetitive Ansible configuration tasks, in
 | ------------------- | ------------------------------------------------------ | -------- | ------- | --------- |
 | `hosts`             | Target hosts or host group                             | ✅ Yes   | -       | `string`  |
 | `inventory`         | Path to Ansible inventory file                         | ✅ Yes   | -       | `string`  |
+| `playbook`          | Playbook to execute                                    | ❌ No    | `''`    | `string`  |
 | `limit`             | Limit execution to specific hosts                      | ❌ No    | `''`    | `string`  |
 | `verbosity`         | Ansible verbosity level (`-v`, `-vv`, `-vvv`, `-vvvv`) | ❌ No    | `''`    | `string`  |
 | `dry_run`           | Run in check mode                                      | ❌ No    | `false` | `boolean` |
