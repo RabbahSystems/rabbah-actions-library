@@ -1,0 +1,30 @@
+name: Setup Secret Files
+description: "Decodes and writes secret files based on passed dynamic prefix"
+
+inputs:
+  prefix:
+    description: "Prefix to prepend to secret name"
+    required: true
+  suffix:
+    description: "Suffix to append to secret name"
+    required: true
+  filename:
+    description: "Filename to create"
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Construct Secret Name
+      shell: bash
+      run: |
+        echo "PREFIX=$(echo "${{ inputs.prefix }}" | tr '[:lower:]' '[:upper:]')"
+        echo "SUFFIX=$(echo "${{ inputs.suffix }}" | tr '[:lower:]' '[:upper:]')"
+
+        echo "SECRET_NAME=${PREFIX}${SUFFIX}" >> $GITHUB_ENV
+
+    - name: Write Secret File
+      shell: bash
+      run: |
+        echo "Writing $SECRET_NAME to ${{ inputs.filename }}"
+        echo "${{ secrets[env.SECRET_NAME] }}" > "${{ inputs.filename }}"
