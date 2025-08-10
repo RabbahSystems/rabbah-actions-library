@@ -97,7 +97,7 @@ runs:
         echo "all_flags=$ALL_FLAGS" >> $GITHUB_OUTPUT
 
         # Group output for better visibility
-        echo "::group::📦 Ansible Configuration Summary"
+        echo "::group:: Ansible Configuration Summary"
         echo "Target Hosts: ${{ inputs.hosts }}"
         echo "Inventory: ${{ inputs.inventory }}"
         echo "Limit: ${{ inputs.limit || 'none' }}"
@@ -106,7 +106,7 @@ runs:
         echo "Combined Flags: $ALL_FLAGS"
         echo "::endgroup::"
 
-        echo "✅ Configuration complete!"
+        echo "Configuration complete!"
 
     - name: Display Run Configuration
       shell: bash
@@ -118,6 +118,7 @@ runs:
         echo "╠══════════════════════════════════════════════════════╣"
         printf "║ %-20s : %-30s ║\n" "Target Hosts" "${{ inputs.hosts }}"
         printf "║ %-20s : %-30s ║\n" "Inventory" "${{ inputs.inventory }}"
+        printf "║ %-20s : %-30s ║\n" "Playbook" "${{ inputs.playbook }}"
         printf "║ %-20s : %-30s ║\n" "Limit" "${{ inputs.limit || '(none)' }}"
         printf "║ %-20s : %-30s ║\n" "Verbosity" "${{ inputs.verbosity || 'Normal' }}"
         printf "║ %-20s : %-30s ║\n" "Dry Run" "${{ inputs.dry_run }}"
@@ -164,7 +165,7 @@ runs:
       if: inputs.test_connectivity == 'true'
       shell: bash
       run: |
-        echo "🔌 Testing connectivity to hosts..."
+        echo "Testing connectivity to hosts..."
 
         LIMIT_FLAG="${{ steps.configure.outputs.limit_flag }}"
         VERBOSITY_FLAG="${{ steps.configure.outputs.verbosity_flag }}"
@@ -185,32 +186,32 @@ runs:
             echo "status=partial" >> $GITHUB_OUTPUT
         fi
 
-    - name: Write Configuration Summary
-      shell: bash
-      run: |
-        # Write ACTUAL JOB RESULTS to the summary, not instructions
-        cat >> $GITHUB_STEP_SUMMARY << EOF
-        ## 📋 Ansible Pre-flight Check Results
-
-        ### ✅ Configuration Complete
-
-        | Check | Result |
-        |-------|--------|
-        | **Target Hosts** | \`${{ inputs.hosts }}\` |
-        | **Inventory File** | ✅ Found |
-        | **Playbook** | \${{ inputs.playbook }}\ |
-        | **Hosts to Process** | ${{ steps.inventory_check.outputs.host_count || 'N/A' }} |
-        | **Connectivity** | ${{ steps.connectivity.outputs.status == 'success' && '✅ All reachable' || '⚠️ Some unreachable' }} |
-        | **Mode** | ${{ inputs.dry_run == 'true' && '🔍 DRY RUN (check mode)' || '⚡ LIVE (will make changes)' }} |
-
-        ### 🎯 Applied Configuration
-
-        | Setting | Value |
-        |---------|-------|
-        | **Limit** | ${{ inputs.limit || 'None (all hosts)' }} |
-        | **Verbosity** | ${{ inputs.verbosity || 'Normal' }} |
-        | **Ansible Flags** | \`${{ steps.configure.outputs.all_flags || '(none)' }}\` |
-
-        ---
-
-        EOF
+    # - name: Write Configuration Summary
+    #   shell: bash
+    #   run: |
+    #     # Write ACTUAL JOB RESULTS to the summary, not instructions
+    #     cat >> $GITHUB_STEP_SUMMARY << EOF
+    #     ## 📋 Ansible Pre-flight Check Results
+    #
+    #     ### ✅ Configuration Complete
+    #
+    #     | Check | Result |
+    #     |-------|--------|
+    #     | **Target Hosts** | \`${{ inputs.hosts }}\` |
+    #     | **Inventory File** | ✅ Found |
+    #     | **Playbook** | \${{ inputs.playbook }}\ |
+    #     | **Hosts to Process** | ${{ steps.inventory_check.outputs.host_count || 'N/A' }} |
+    #     | **Connectivity** | ${{ steps.connectivity.outputs.status == 'success' && '✅ All reachable' || '⚠️ Some unreachable' }} |
+    #     | **Mode** | ${{ inputs.dry_run == 'true' && '🔍 DRY RUN (check mode)' || '⚡ LIVE (will make changes)' }} |
+    #
+    #     ### 🎯 Applied Configuration
+    #
+    #     | Setting | Value |
+    #     |---------|-------|
+    #     | **Limit** | ${{ inputs.limit || 'None (all hosts)' }} |
+    #     | **Verbosity** | ${{ inputs.verbosity || 'Normal' }} |
+    #     | **Ansible Flags** | \`${{ steps.configure.outputs.all_flags || '(none)' }}\` |
+    #
+    #     ---
+    #
+    #     EOF
