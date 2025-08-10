@@ -30,7 +30,7 @@ runs:
       shell: bash
       run: |
         echo "SECRET IS ${{ env.SECRET_NAME }}"
-        SECRET_VALUE=$(echo '${{ inputs.secrets }}' | jq ".${{ env.SECRET_NAME }}")
+        SECRET_VALUE=$(echo '${{ inputs.secrets }}' | jq --raw-output ".${{ env.SECRET_NAME }}")
         echo "SECRET VALUE IS"
         echo "$SECRET_VALUE"
         echo "$SECRET_VALUE" | base64 -d
