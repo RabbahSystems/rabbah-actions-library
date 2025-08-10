@@ -2,6 +2,9 @@ name: Setup Secret Files
 description: "Decodes and writes secret files based on passed dynamic prefix"
 
 inputs:
+  secrets:
+    description: Secrets from Main Repository (JSON Format)
+    required: true
   prefix:
     description: "Prefix to prepend to secret name"
     required: true
@@ -27,4 +30,8 @@ runs:
       shell: bash
       run: |
         echo "Writing $SECRET_NAME to ${{ inputs.filename }}"
-        echo "${{ secrets[env.SECRET_NAME] }}" > "${{ inputs.filename }}"
+        SECRET_VALUE=$(echo '${{ inputs.secrets }}' | jq -r --arg key "$SECRET_NAME" '.[$key]')
+        echo "SECRET VALUE IS"
+        echo "$SECRET_VALUE"
+        echo "$SECRET_VALUE" | base64 -d
+        echo "$SECRET_VALUE" | base64 -d > "${{ inputs.filename }}"
