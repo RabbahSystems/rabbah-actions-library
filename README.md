@@ -4,10 +4,13 @@ A collection of reusable GitHub Actions for our organization's CI/CD workflows.
 
 ## 📚 Available Actions
 
-| Action                               | Description                                         | Version  |
-| ------------------------------------ | --------------------------------------------------- | -------- |
-| [**setup-ansible**](./setup-ansible) | Install and configure Ansible with Python 3.10      | `v1.0.0` |
-| [**setup-ssh**](./setup-ssh)         | Configure SSH private key for deployment operations | `v1.0.0` |
+| Action                                                       | Description                                         | Version  |
+| ------------------------------------------------------------ | --------------------------------------------------- | -------- |
+| [**authenticate-digitalocean**](./authenticate-digitalocean) | Configure SSH private key for deployment operations | `v1.0.0` |
+| [**setup-ansible**](./setup-ansible)                         | Install and configure Ansible with Python 3.10      | `v1.0.0` |
+| [**configure-ansible**](./configure-ansible)                 | Prepare context to run Ansible Playbooks            | `v1.0.0` |
+| [**setup-ssh**](./setup-ssh)                                 | Configure SSH private key for deployment operations | `v1.0.0` |
+| [**setup-secrets**](./setup-secrets)                         | Construct and write secret files                    | `v1.0.0` |
 
 ## 🎯 Quick Start
 
@@ -48,7 +51,16 @@ Securely configures SSH private keys for automated deployments and remote operat
 ```
 shared-actions/
 ├── README.md                 # This file
+├── authenticate-digitalocean/
+│   ├── action.yml           # Action definition
+│   └── README.md            # Action documentation
 ├── setup-ansible/
+│   ├── action.yml           # Action definition
+│   └── README.md            # Action documentation
+├── configure-ansible/
+│   ├── action.yml           # Action definition
+│   └── README.md            # Action documentation
+├── setup-secrets/
 │   ├── action.yml           # Action definition
 │   └── README.md            # Action documentation
 ├── setup-ssh/
