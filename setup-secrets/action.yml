@@ -21,10 +21,11 @@ runs:
     - name: Construct Secret Name
       shell: bash
       run: |
-        echo "PREFIX=$(echo "${{ inputs.prefix }}" | tr '[:lower:]' '[:upper:]')"
-        echo "SUFFIX=$(echo "${{ inputs.suffix }}" | tr '[:lower:]' '[:upper:]')"
+        PREFIX=$(echo "${{ inputs.prefix }}" | tr '[:lower:]' '[:upper:]')
+        SUFFIX=$(echo "${{ inputs.suffix }}" | tr '[:lower:]' '[:upper:]')
 
         echo "SECRET_NAME=${PREFIX}${SUFFIX}" >> $GITHUB_ENV
+
     - name: Write Secret File
       shell: bash
       run: |
