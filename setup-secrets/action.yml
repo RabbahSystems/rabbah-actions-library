@@ -25,12 +25,13 @@ runs:
         echo "SUFFIX=$(echo "${{ inputs.suffix }}" | tr '[:lower:]' '[:upper:]')"
 
         echo "SECRET_NAME=${PREFIX}${SUFFIX}" >> $GITHUB_ENV
+        echo "SECRET IS $SECRET_NAME"
 
     - name: Write Secret File
       shell: bash
       run: |
         echo "Writing $SECRET_NAME to ${{ inputs.filename }}"
-        SECRET_VALUE=$(echo '${{ inputs.secrets }}' | jq -r --arg key "$SECRET_NAME" '.[$key]')
+        SECRET_VALUE=$(echo '${{ inputs.secrets }}' | jq ".$SECRET_NAME")
         echo "SECRET VALUE IS"
         echo "$SECRET_VALUE"
         echo "$SECRET_VALUE" | base64 -d
