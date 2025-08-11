@@ -22,4 +22,7 @@ runs:
       env:
         DISCORD_WEBHOOK: ${{ steps.discord.outputs.DISCORD_WEBHOOK }}
       with:
-        args: ${{ inputs.MESSAGE }}
+        args: |
+          ${{ inputs.MESSAGE }}
+
+          ==============================
