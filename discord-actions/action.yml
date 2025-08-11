@@ -3,7 +3,7 @@ description: "Send a message to Discord channel"
 
 inputs:
   discord_webhook:
-    description: "Discord Webhook To Authenticate Sender"
+    description: "Base64 Encoded Discord Webhook To Authenticate Sender"
     required: true
   message:
     description: "Message to send!"
@@ -12,9 +12,14 @@ inputs:
 runs:
   using: composite
   steps:
+    - name: Decode Webhook
+      shell: bash
+      id: discord
+      run: echo "DISCORD_WEBHOOK=$(echo "${{ inputs.discord_webhook }}" | base64 -d)" >> "$GITHUB_OUTPUT"
+
     - name: Send Discord Notification
       uses: Ilshidur/action-discord@master
       env:
-        DISCORD_WEBHOOK: ${{ inputs.DISCORD_WEBHOOK }}
+        DISCORD_WEBHOOK: ${{ steps.discord.outputs.DISCORD_WEBHOOK }}
       with:
         args: ${{ inputs.MESSAGE }}
