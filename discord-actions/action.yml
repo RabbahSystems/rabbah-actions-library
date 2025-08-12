@@ -68,7 +68,7 @@ runs:
               "title": $title,
               "description": $description,
               "color": ($color | tonumber),
-              "timestamp": $timestamp
+              "timestamp": $timestamp,
               "fields": $fields[0]
           }]')
 
