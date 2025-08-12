@@ -24,10 +24,6 @@ inputs:
     description: "JSON array of fields for the embed"
     required: false
     default: "[]"
-  service_name:
-    description: "Service name for footer"
-    required: false
-    default: "Service"
 
 runs:
   using: composite
@@ -55,7 +51,6 @@ runs:
         FINAL_JSON="${{ inputs.embed_template }}"
         FINAL_JSON="${FINAL_JSON//\{\{TITLE\}\}/${{ inputs.embed_title }}}"
         FINAL_JSON="${FINAL_JSON//\{\{COLOR\}\}/${{ inputs.embed_color }}}"
-        FINAL_JSON="${FINAL_JSON//\{\{SERVICE_NAME\}\}/${{ inputs.service_name }}}"
         FINAL_JSON="${FINAL_JSON//\{\{FIELDS\}\}/${{ inputs.embed_fields }}}"
         echo "PROCESSED_EMBED=$FINAL_JSON" >> "$GITHUB_OUTPUT"
 
@@ -73,6 +68,9 @@ runs:
         DISCORD_WEBHOOK: ${{ steps.discord.outputs.DISCORD_WEBHOOK }}
       with:
         args: |
+
           ======== MESSAGE START ========
+
           ${{ inputs.message }}
+
           ========  MESSAGE END  ========
