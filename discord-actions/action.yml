@@ -11,6 +11,7 @@ inputs:
   embed:
     description: "Discord embeds"
     required: false
+    default: ""
 
 runs:
   using: composite
@@ -21,10 +22,17 @@ runs:
       run: echo "DISCORD_WEBHOOK=$(echo "${{ inputs.discord_webhook }}" | base64 -d)" >> "$GITHUB_OUTPUT"
 
     - name: Send Discord Notification
+      if: inputs.embed != ''
       uses: Ilshidur/action-discord@master
       env:
         DISCORD_WEBHOOK: ${{ steps.discord.outputs.DISCORD_WEBHOOK }}
         DISCORD_EMBEDS: ${{ inputs.embed }}
+
+    - name: Send Discord Notification
+      if: inputs.embed == ''
+      uses: Ilshidur/action-discord@master
+      env:
+        DISCORD_WEBHOOK: ${{ steps.discord.outputs.DISCORD_WEBHOOK }}
       with:
         args: |
 
