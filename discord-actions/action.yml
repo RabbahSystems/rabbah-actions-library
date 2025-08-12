@@ -63,15 +63,13 @@ runs:
           --arg title "$EMBED_TITLE" \
           --arg color "$EMBED_COLOR" \
           --slurpfile fields /tmp/embed_fields.json \
-          '{
-            "embeds": [{
+          '[{
               "title": $title,
               "color": ($color | tonumber),
               "fields": $fields[0]
-            }]
-          }')
+          }]')
 
-        echo "EMBED_JSON_SINGLE_LINE=$(echo "$EMBED_JSON" | jq '.embeds' | jq -c .)"
+        echo "EMBED_JSON_SINGLE_LINE=$(echo "$EMBED_JSON" | jq -c .)"
         echo "EMBED_JSON IS $EMBED_JSON_SINGLE_LINE"
 
         echo "PROCESSED_EMBED=$EMBED_JSON_SINGLE_LINE" >> "$GITHUB_OUTPUT"
