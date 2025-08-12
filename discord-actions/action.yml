@@ -73,7 +73,7 @@ runs:
 
         echo "EMBED_JSON IS $EMBED_JSON"
 
-        echo "PROCESSED_EMBED=$EMBED_JSON" >> "$GITHUB_OUTPUT"
+        echo "PROCESSED_EMBED=$(echo "$EMBED_JSON" | jq -c .)" >> "$GITHUB_OUTPUT"
 
     - name: Send Discord Message Using Embed Templates
       if: inputs.embed_template != ''
