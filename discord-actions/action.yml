@@ -23,6 +23,9 @@ runs:
         DISCORD_WEBHOOK: ${{ steps.discord.outputs.DISCORD_WEBHOOK }}
       with:
         args: |
+
+          ======== MESSAGE START ========
+
           ${{ inputs.MESSAGE }}
 
-          ==============================
+          ========  MESSAGE END  ========
