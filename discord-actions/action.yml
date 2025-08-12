@@ -51,34 +51,28 @@ runs:
       if: inputs.embed_template != ''
       shell: bash
       id: embed
-      env:
-        EMBED_TITLE: ${{ inputs.embed_title }}
-        EMBED_COLOR: ${{ inputs.embed_color }}
-        EMBED_FIELDS: ${{ inputs.embed_fields }}
       run: |
         cat << 'FIELDS_END' > /tmp/embed_fields.json
         ${{ inputs.embed_fields }}
         FIELDS_END
 
-        echo "JSON FILE"
-        cat "/tmp/embed_fields.json"
+        TIMESTAMP=$(date -u +%Y-%m-%dT%H:%M:%S.%3NZ)
 
         EMBED_JSON=$(jq -n \
           --arg title "${{ inputs.embed_title }}" \
           --arg description "${{ inputs.embed_description }}" \
           --arg color "${{ inputs.embed_color }}" \
+          --arg timestamp "$TIMESTAMP" \
           --slurpfile fields /tmp/embed_fields.json \
           '[{
               "title": $title,
               "description": $description,
               "color": ($color | tonumber),
+              "timestamp": $timestamp
               "fields": $fields[0]
           }]')
 
-        EMBED_JSON_SINGLE_LINE=$(echo "$EMBED_JSON" | jq -c .)
-        echo "EMBED_JSON IS $EMBED_JSON_SINGLE_LINE"
-
-        echo "PROCESSED_EMBED=$EMBED_JSON_SINGLE_LINE" >> "$GITHUB_OUTPUT"
+        echo "PROCESSED_EMBED=$(echo "$EMBED_JSON" | jq -c .)" >> "$GITHUB_OUTPUT"
 
     - name: Send Discord Message Using Embed Templates
       if: inputs.embed_template != ''
