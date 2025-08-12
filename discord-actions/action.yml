@@ -28,15 +28,15 @@ inputs:
 runs:
   using: composite
   steps:
-    # - name: Validate Conflicted Fields Inputs
-    #   if: inputs.embed_template != '' && inputs.message != ''
-    #   shell: bash
-    #   run: echo "::error::Cannot provide both 'embed_template' and 'message', Choose one!" && exit 1
-    #
-    # - name: Validate Required Inputs
-    #   if: inputs.embed_template == '' && inputs.message == ''
-    #   shell: bash
-    #   run: echo "::error::Either 'message' or 'embed_template' is required" && exit 1
+    - name: Validate Conflicted Fields Inputs
+      if: inputs.embed_template != '' && inputs.message != ''
+      shell: bash
+      run: echo "::error::Cannot provide both 'embed_template' and 'message', Choose one!" && exit 1
+
+    - name: Validate Required Inputs
+      if: inputs.embed_template == '' && inputs.message == ''
+      shell: bash
+      run: echo "::error::Either 'message' or 'embed_template' is required" && exit 1
 
     - name: Decode Webhook
       shell: bash
@@ -52,21 +52,15 @@ runs:
         EMBED_COLOR: ${{ inputs.embed_color }}
         EMBED_FIELDS: ${{ inputs.embed_fields }}
       run: |
-        # echo -e "Title: ${{ inputs.embed_title }}\nColor: ${{ inputs.embed_color }}\nFields: ${{ inputs.embed_fields }}"
-        # FIELDS_JSON=$(echo "${{ inputs.embed_fields }}" | base64 -d)
-        cat > /tmp/embed_fields.json << 'FIELDS_END'
-        ${{ inputs.embed_fields }}
-        FIELDS_END
-
         EMBED_JSON=$(jq -n \
           --arg title "$EMBED_TITLE" \
           --arg color "$EMBED_COLOR" \
-          --slurpfile fields /tmp/embed_fields.json \
+          --argjson fields "$EMBED_FIELDS" \
           '{
             "embeds": [{
               "title": $title,
               "color": ($color | tonumber),
-              "fields": $fields[0]
+              "fields": $fields
             }]
           }')
 
