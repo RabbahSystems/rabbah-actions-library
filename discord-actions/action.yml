@@ -53,16 +53,15 @@ runs:
         EMBED_FIELDS: ${{ inputs.embed_fields }}
       run: |
         # echo -e "Title: ${{ inputs.embed_title }}\nColor: ${{ inputs.embed_color }}\nFields: ${{ inputs.embed_fields }}"
-        FIELDS_JSON=$(echo "${{ inputs.embed_fields }}" | base64 -d)
+        # FIELDS_JSON=$(echo "${{ inputs.embed_fields }}" | base64 -d)
         EMBED_JSON=$(jq -n \
           --arg title "$EMBED_TITLE" \
           --arg color "$EMBED_COLOR" \
-          --argjson fields "$EMBED_FIELDS" \
           '{
             "embeds": [{
               "title": $title,
               "color": ($color | tonumber),
-              "fields": $fields
+              "fields": ${{ inputs.embed_fields }}
             }]
           }')
 
