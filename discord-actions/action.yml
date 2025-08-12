@@ -16,6 +16,10 @@ inputs:
     description: "Title for the embed"
     required: false
     default: "Notification"
+  embed_description:
+    description: "Description for the embed"
+    required: false
+    default: ""
   embed_color:
     description: "Color for the embed (decimal)"
     required: false
@@ -60,11 +64,13 @@ runs:
         cat "/tmp/embed_fields.json"
 
         EMBED_JSON=$(jq -n \
-          --arg title "$EMBED_TITLE" \
-          --arg color "$EMBED_COLOR" \
+          --arg title "${{ inputs.embed_title }}" \
+          --arg description "${{ inputs.embed_description }}" \
+          --arg color "${{ inputs.embed_color }}" \
           --slurpfile fields /tmp/embed_fields.json \
           '[{
               "title": $title,
+              "description": $description,
               "color": ($color | tonumber),
               "fields": $fields[0]
           }]')
