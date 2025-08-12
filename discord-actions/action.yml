@@ -71,9 +71,10 @@ runs:
             }]
           }')
 
-        echo "EMBED_JSON IS $EMBED_JSON"
+        echo "EMBED_JSON_SINGLE_LINE=$(echo "$EMBED_JSON" | jq '.embeds' | jq -c .)"
+        echo "EMBED_JSON IS $EMBED_JSON_SINGLE_LINE"
 
-        echo "PROCESSED_EMBED=$(echo "$EMBED_JSON" | jq -c .)" >> "$GITHUB_OUTPUT"
+        echo "PROCESSED_EMBED=$EMBED_JSON_SINGLE_LINE" >> "$GITHUB_OUTPUT"
 
     - name: Send Discord Message Using Embed Templates
       if: inputs.embed_template != ''
