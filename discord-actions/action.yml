@@ -50,17 +50,24 @@ runs:
       env:
         EMBED_TITLE: ${{ inputs.embed_title }}
         EMBED_COLOR: ${{ inputs.embed_color }}
-        # EMBED_FIELDS: ${{ inputs.embed_fields }}
+        EMBED_FIELDS: ${{ inputs.embed_fields }}
       run: |
+        cat << 'FIELDS_END' > /tmp/embed_fields.json
+        ${{ inputs.embed_fields }}
+        FIELDS_END
+
+        echo "JSON FILE"
+        cat "/tmp/embed_fields.json"
+
         EMBED_JSON=$(jq -n \
           --arg title "$EMBED_TITLE" \
           --arg color "$EMBED_COLOR" \
-          --argjson fields "$(echo "${{ inputs.embed_fields }}" | base64 -d)" \
+          --slurpfile fields /tmp/embed_fields.json \
           '{
             "embeds": [{
               "title": $title,
               "color": ($color | tonumber),
-              "fields": $fields
+              "fields": $fields[0]
             }]
           }')
 
