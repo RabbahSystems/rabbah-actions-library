@@ -21,9 +21,9 @@ inputs:
     required: false
     default: "3066993"
   embed_fields:
-    description: "JSON array of fields for the embed"
+    description: "Base64 Encoded JSON array of fields for the embed"
     required: false
-    default: "[]"
+    default: ""
 
 runs:
   using: composite
@@ -47,12 +47,17 @@ runs:
       if: inputs.embed_template != ''
       shell: bash
       id: embed
+      env:
+        EMBED_TITLE: ${{ inputs.embed_title }}
+        EMBED_COLOR: ${{ inputs.embed_color }}
+        EMBED_FIELDS: ${{ inputs.embed_fields }}
       run: |
         echo -e "Title: ${{ inputs.embed_title }}\nColor: ${{ inputs.embed_color }}\nFields: ${{ inputs.embed_fields }}"
+        FIELDS_JSON=$(echo "${{ inputs.embed_fields }}" | base64 -d)
         EMBED_JSON=$(jq -n \
-          --arg title "${{ inputs.embed_title }}" \
-          --arg color "${{ inputs.embed_color }}" \
-          --argjson fields '${{ inputs.embed_fields }}' \
+          --arg title "$EMBED_TITLE" \
+          --arg color "$EMBED_COLOR" \
+          --argjson fields "$EMBED_FIELDS" \
           '{
             "embeds": [{
               "title": $title,
