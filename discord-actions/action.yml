@@ -48,11 +48,17 @@ runs:
       shell: bash
       id: embed
       run: |
-        FINAL_JSON="${{ inputs.embed_template }}"
-        FINAL_JSON="${FINAL_JSON//\{\{TITLE\}\}/${{ inputs.embed_title }}}"
-        FINAL_JSON="${FINAL_JSON//\{\{COLOR\}\}/${{ inputs.embed_color }}}"
-        FINAL_JSON="${FINAL_JSON//\{\{FIELDS\}\}/${{ inputs.embed_fields }}}"
-        echo "PROCESSED_EMBED=$FINAL_JSON" >> "$GITHUB_OUTPUT"
+        cat << 'EOF' > template.json
+          ${{ inputs.embed_template }}
+        EOF
+
+        # Use sed on the file
+        sed -i "s/{{TITLE}}/${{ inputs.embed_title }}/g" template.json
+        sed -i "s/{{COLOR}}/${{ inputs.embed_color }}/g" template.json
+        sed -i "s/{{SERVICE_NAME}}/${{ inputs.service_name }}/g" template.json
+        sed -i "s/{{FIELDS}}/${{ inputs.embed_fields }}/g" template.json
+
+        echo "PROCESSED_EMBED=$(cat template.json)" >> "$GITHUB_OUTPUT"
 
     - name: Send Discord Message Using Embed Templates
       if: inputs.embed_template != ''
