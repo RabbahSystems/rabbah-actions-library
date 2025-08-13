@@ -22,7 +22,12 @@ runs:
         EOF
 
         yq eval '.[] | .key + "=" + .value' config.yml | while IFS='=' read -r key value; do
-          # executed_value=$(eval "$value")
-          echo "Setting $key to $value"
-          echo "$key=$value" >> "$GITHUB_ENV"
+          if [[ "$value" =~ ^(echo|date|git|curl|whoami|pwd|basename|dirname|cat|grep|awk|sed) ]]; then
+            executed_value=$(eval "$value")
+            echo "Setting $key to $executed_value (executed)"
+            echo "$key=$executed_value" >> "$GITHUB_ENV"
+          else
+            echo "Setting $key to $value (literal)"
+            echo "$key=$value" >> "$GITHUB_ENV"
+          fi
         done
