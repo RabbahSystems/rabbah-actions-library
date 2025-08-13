@@ -21,7 +21,7 @@ runs:
         ${{ inputs.env-vars }}
         EOF
 
-        yq eval '.[] | .name + "=" + .value' config.yml | while IPS='=' read -r key value; do
+        yq eval '.[] | .key + "=" + .value' config.yml | while IPS='=' read -r key value; do
           executed_value=$(eval "$value")
           echo "Setting $key to $executed_value"
           echo "$key=$executed_value" >> "$GITHUB_ENV"
