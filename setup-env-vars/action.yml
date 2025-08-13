@@ -1,0 +1,27 @@
+name: "Assign Environment Variables"
+description: "Key-Value pair to pass to github environment variables"
+inputs:
+  env-vars:
+    description: "YAML key/value pair to add to environment"
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Install yq to Parse YAML
+      shell: bash
+      run: |
+        sudo wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
+        sudo chmod +x /usr/local/bin/yq
+
+    - name: Iterate and assign env vars
+      shell: bash
+      run: |
+        cat << 'EOF' > config.yml # Write input to file
+        ${{ inputs.env-vars }}
+        EOF
+
+        yq eval '.[] | .name + "=" + .value' config.yml | while IPS='=' read -r key value; do
+          echo "Setting $key to $value"
+          echo "$key=$value" >> "$GITHUB_ENV"
+        done
