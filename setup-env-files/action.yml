@@ -1,0 +1,31 @@
+name: "Write Environment Variables"
+description: "Key-Value pair to pass to github environment variables"
+inputs:
+  filename:
+    description: "Filename to write to, default is .env"
+    default: ".env"
+  env-vars:
+    description: "YAML key/value pair to add to environment"
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Install yq to Parse YAML
+      shell: bash
+      run: |
+        sudo wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
+        sudo chmod +x /usr/local/bin/yq
+
+    - name: Iterate and write env vars
+      shell: bash
+      run: |
+        cat << 'EOF' > config.yml # Write input to file
+        ${{ inputs.env-vars }}
+        EOF
+
+        yq eval '.[] | .key + "=" + .value' config.yml | while IFS='=' read -r key value; do
+          decoded_value=$(echo "$value" | base64 -d)
+          echo "Adding $key=$decoded_value to ${{ inputs.filename }}"
+          echo "$key=$decoded_value" >> "${{ inputs.filename }}"
+        done
