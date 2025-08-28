@@ -31,4 +31,5 @@ runs:
       run: |
         SECRET_VALUE=$(echo '${{ inputs.secrets }}' | jq --raw-output ".${{ env.SECRET_NAME }}")
         echo "$SECRET_NAME=$SECRET_VALUE"
+        echo "$SECRET_NAME=$SECRET_VALUE"
         echo "$SECRET_VALUE" | base64 -d > "${{ inputs.filename }}"
