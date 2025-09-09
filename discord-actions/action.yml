@@ -45,7 +45,10 @@ runs:
     - name: Decode Webhook
       shell: bash
       id: discord
-      run: echo "DISCORD_WEBHOOK=$(echo "${{ inputs.discord_webhook }}" | base64 -d)" >> "$GITHUB_OUTPUT"
+      run: |
+        echo "${{ inputs.discord_webhook }}"
+        echo "${{ inputs.discord_webhook }}" | base64 -d
+        echo "DISCORD_WEBHOOK=$(echo "${{ inputs.discord_webhook }}" | base64 -d)" >> "$GITHUB_OUTPUT"
 
     - name: Process Embed Template
       if: inputs.embed_template != ''
