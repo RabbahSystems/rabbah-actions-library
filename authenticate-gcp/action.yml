@@ -11,7 +11,7 @@ runs:
     - name: Create credentials file
       shell: bash
       run: |
-        mkdir -p .config/gcloud
+        mkdir -p "$HOME/.config/gcloud"
         ls -la -R "$HOME/.config"
         echo "${{ inputs.credentials_file }}" | base64 -d > "$HOME/.config/gcloud/application_default_credentials.json"
         echo "GOOGLE_APPLICATION_CREDENTIALS=$HOME/.config/gcloud/application_default_credentials.json" >> "$GITHUB_ENV"
