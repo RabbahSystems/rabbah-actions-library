@@ -25,7 +25,7 @@ runs:
         sudo chmod 700 /etc/wireguard
 
         echo "${{ inputs.config }}" | base64 -d > "$HOME/${{ inputs.interface }}.conf"
-        sudo mv "$HOME/${{ inputs.interface }}.conf" /etc/wireguard/${{ input.interface }}.conf
+        sudo mv "$HOME/${{ inputs.interface }}.conf" /etc/wireguard/${{ inputs.interface }}.conf
         sudo chmod 600 "/etc/wireguard/${{ inputs.interface }}.conf"
 
     - name: Start WireGuard
@@ -43,7 +43,3 @@ runs:
         echo ""
         echo "=== Routes ==="
         ip route | grep ${{ inputs.interface }} || echo "No specific routes"
-
-    - name: Test connectivity
-      shell: bash
-      run: ping -c 4 10.13.13.1
