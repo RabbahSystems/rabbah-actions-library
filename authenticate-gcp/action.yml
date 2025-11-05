@@ -1,0 +1,26 @@
+name: "Authenticate with GCP"
+description: "Authenticate with GCP using the credentials JSON file"
+inputs:
+  credentials_file:
+    description: "Base64 encoded JSON credentials file"
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Create credentials file
+      shell: bash
+      run: |
+        echo "${{ inputs.credentials_file }}" | base64 -d > "$HOME/.config/gcloud/application_default_credentials.json"
+        echo "GOOGLE_APPLICATION_CREDENTIALS=$HOME/.config/gcloud/application_default_credentials.json" >> "$GITHUB_ENV"
+        cat $HOME/.config/gcloud/application_default_credentials.json
+
+    - name: Authenticate With Google Cloud
+      uses: google-github-actions/auth@v3
+      with:
+        credentials_json: ${{ inputs.credentials_file }}
+
+    - name: Setup gcloud SDK
+      uses: google-github-actions/setup-gcloud@v2
+      with:
+        version: latest
