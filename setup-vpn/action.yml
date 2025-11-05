@@ -1,0 +1,49 @@
+name: Install WireGuard
+description: Setup WireGuard to get access to internal services
+inputs:
+  config:
+    description: "Base64 Peer configuration file"
+    required: true
+  interface:
+    description: "Network interface to use"
+    required: false
+    default: "wg0"
+
+runs:
+  using: composite
+  steps:
+    - name: Install WireGuard
+      shell: bash
+      run: |
+        sudo apt update
+        sudo apt install -y wireguard wireguard-tools
+
+    - name: Create Peer Configuration File
+      shell: bash
+      run: |
+        sudo mkdir -p /etc/wireguard
+        sudo chmod 700 /etc/wireguard
+
+        echo "${{ inputs.config }}" | base64 -d > "$HOME/${{ inputs.interface }}.conf"
+        sudo mv "$HOME/${{ inputs.interface }}.conf" /etc/wireguard/${{ input.interface }}.conf
+        sudo chmod 600 "/etc/wireguard/${{ inputs.interface }}.conf"
+
+    - name: Start WireGuard
+      shell: bash
+      run: sudo wg-quick up ${{ inputs.interface }}
+
+    - name: Display connection info
+      shell: bash
+      run: |
+        echo "=== WireGuard Status ==="
+        sudo wg show ${{ inputs.interface }}
+        echo ""
+        echo "=== Interface Info ==="
+        ip addr show ${{ inputs.interface }}
+        echo ""
+        echo "=== Routes ==="
+        ip route | grep ${{ inputs.interface }} || echo "No specific routes"
+
+    - name: Test connectivity
+      shell: bash
+      run: ping -c 4 10.13.13.1
