@@ -13,7 +13,7 @@ runs:
       run: |
         echo "${{ inputs.credentials_file }}" | base64 -d > "$HOME/.config/gcloud/application_default_credentials.json"
         echo "GOOGLE_APPLICATION_CREDENTIALS=$HOME/.config/gcloud/application_default_credentials.json" >> "$GITHUB_ENV"
-        cat $HOME/.config/gcloud/application_default_credentials.json
+        cat "$HOME/.config/gcloud/application_default_credentials.json"
 
     - name: Authenticate With Google Cloud
       uses: google-github-actions/auth@v3
