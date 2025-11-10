@@ -138,26 +138,26 @@ runs:
           exit 1
         fi
 
-        # Use the limit flag from outputs
         LIMIT_FLAG="${{ steps.configure.outputs.limit_flag }}"
 
-        # List hosts that will be targeted
+        # List hosts that will be targeted using ansible command
         echo "Hosts that will be targeted:"
-        ansible-inventory -i ${{ inputs.inventory }} \
-          --list \
-          --yaml \
-          $LIMIT_FLAG | head -50
+        ansible ${{ inputs.hosts }} \
+          -i ${{ inputs.inventory }} \
+          $LIMIT_FLAG \
+          --list-hosts
 
         echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
         # Count hosts
-        if command -v jq &> /dev/null; then
-          HOST_COUNT=$(ansible-inventory -i ${{ inputs.inventory }} --list $LIMIT_FLAG | jq -r '._meta.hostvars | keys | length')
-          echo "📊 Total hosts to be processed: $HOST_COUNT"
-          
-          # Add annotation with host count
-          echo "::notice title=Host Count::Will process $HOST_COUNT hosts"
-        fi
+        HOST_COUNT=$(ansible ${{ inputs.hosts }} -i ${{ inputs.inventory }} $LIMIT_FLAG --list-hosts 2>/dev/null | grep -c '^ ' || echo "0")
+
+        echo "📊 Total hosts to be processed: $HOST_COUNT"
+        echo "::notice title=Host Count::Will process $HOST_COUNT hosts"
+
+        # Store for later use
+        echo "host_count=$HOST_COUNT" >> $GITHUB_OUTPUT
+
         echo "::endgroup::"
 
     - name: Test Connectivity
@@ -185,33 +185,3 @@ runs:
             echo "⚠️  Some hosts unreachable (exit code: $EXIT_CODE)"
             echo "status=partial" >> $GITHUB_OUTPUT
         fi
-
-    # - name: Write Configuration Summary
-    #   shell: bash
-    #   run: |
-    #     # Write ACTUAL JOB RESULTS to the summary, not instructions
-    #     cat >> $GITHUB_STEP_SUMMARY << EOF
-    #     ## 📋 Ansible Pre-flight Check Results
-    #
-    #     ### ✅ Configuration Complete
-    #
-    #     | Check | Result |
-    #     |-------|--------|
-    #     | **Target Hosts** | \`${{ inputs.hosts }}\` |
-    #     | **Inventory File** | ✅ Found |
-    #     | **Playbook** | \${{ inputs.playbook }}\ |
-    #     | **Hosts to Process** | ${{ steps.inventory_check.outputs.host_count || 'N/A' }} |
-    #     | **Connectivity** | ${{ steps.connectivity.outputs.status == 'success' && '✅ All reachable' || '⚠️ Some unreachable' }} |
-    #     | **Mode** | ${{ inputs.dry_run == 'true' && '🔍 DRY RUN (check mode)' || '⚡ LIVE (will make changes)' }} |
-    #
-    #     ### 🎯 Applied Configuration
-    #
-    #     | Setting | Value |
-    #     |---------|-------|
-    #     | **Limit** | ${{ inputs.limit || 'None (all hosts)' }} |
-    #     | **Verbosity** | ${{ inputs.verbosity || 'Normal' }} |
-    #     | **Ansible Flags** | \`${{ steps.configure.outputs.all_flags || '(none)' }}\` |
-    #
-    #     ---
-    #
-    #     EOF
