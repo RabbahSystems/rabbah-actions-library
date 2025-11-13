@@ -43,13 +43,16 @@ runs:
       shell: bash
       run: |
         echo "=== WireGuard Status ==="
-        sudo wg show ${{ inputs.interface }}
+        sudo wg show 
         echo ""
         echo "=== Interface Info ==="
         ip addr show ${{ inputs.interface }}
         echo ""
         echo "=== Routes ==="
-        ip route | grep ${{ inputs.interface }} || echo "No specific routes"
+        ip route show || echo "No specific routes"
+        echo ""
+        echo "=== Ping WireGuard DNS ==="
+        ping -c 3 10.13.13.1 || true
 
     - name: Print Peer Configuration File
       shell: bash
