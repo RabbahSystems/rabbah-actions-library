@@ -66,18 +66,18 @@ runs:
         echo "=== Ping Automation Machine ==="
         ping -c 4 10.1.1.2
 
-    - name: Test WireGuard connectivity
-      shell: bash
-      if: inputs.debug == 'true'
-      run: |
-        echo "=== Ping WireGuard peer ==="
-        ping -c 3 10.1.0.2 || echo "Cannot reach WireGuard gateway"
-
-        echo "=== Ping target host ==="
-        ping -c 3 10.1.1.2 || echo "Cannot reach target host"
-
-        echo "=== Test SSH port ==="
-        nc -zv -w 5 10.1.1.2 22 || echo "SSH port not reachable"
-
-        echo "=== WireGuard handshake ==="
-        sudo wg show wg0
+    # - name: Test WireGuard connectivity
+    #   shell: bash
+    #   if: inputs.debug == 'true'
+    #   run: |
+    #     echo "=== Ping WireGuard peer ==="
+    #     ping -c 3 10.1.0.2 || echo "Cannot reach WireGuard gateway"
+    #
+    #     echo "=== Ping target host ==="
+    #     ping -c 3 10.1.1.2 || echo "Cannot reach target host"
+    #
+    #     echo "=== Test SSH port ==="
+    #     nc -zv -w 5 10.1.1.2 22 || echo "SSH port not reachable"
+    #
+    #     echo "=== WireGuard handshake ==="
+    #     sudo wg show wg0
