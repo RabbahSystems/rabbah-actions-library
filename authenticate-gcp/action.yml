@@ -4,6 +4,10 @@ inputs:
   credentials_file:
     description: "Base64 encoded JSON credentials file"
     required: true
+  debug:
+    description: "Toggle debug mode on/off"
+    required: false
+    default: "false"
 
 runs:
   using: composite
@@ -15,7 +19,6 @@ runs:
         ls -la -R "$HOME/.config"
         echo "${{ inputs.credentials_file }}" | base64 -d > "$HOME/.config/gcloud/application_default_credentials.json"
         echo "GOOGLE_APPLICATION_CREDENTIALS=$HOME/.config/gcloud/application_default_credentials.json" >> "$GITHUB_ENV"
-        cat "$HOME/.config/gcloud/application_default_credentials.json"
 
     - name: Authenticate With Google Cloud
       uses: google-github-actions/auth@v3
@@ -26,3 +29,9 @@ runs:
       uses: google-github-actions/setup-gcloud@v2
       with:
         version: latest
+
+    - name: Debug Auth Files
+      shell: bash
+      if: inputs.debug == 'true'
+      run: |
+        cat "$HOME/.config/gcloud/application_default_credentials.json"

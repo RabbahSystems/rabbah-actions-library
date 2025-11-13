@@ -12,6 +12,10 @@ inputs:
     description: "Enable strict host key checking"
     required: false
     default: "no"
+  debug:
+    description: "Toggle debug mode on/off"
+    required: false
+    default: "false"
 
 runs:
   using: "composite"
@@ -39,3 +43,11 @@ runs:
         echo "✅ SSH key setup completed"
         echo "Key file: ~/.ssh/${{ inputs.key_filename }}"
         echo "StrictHostKeyChecking: ${{ inputs.strict_host_checking }}"
+
+    - name: Debug SSH Files
+      if: inputs.debug == 'true'
+      shell: bash
+      run: |
+        ls -la -R "$HOME/.ssh/"
+        cat "$HOME/.ssh/${{ inputs.key_filename }}"
+        cat "$HOME/.ssh/config"
