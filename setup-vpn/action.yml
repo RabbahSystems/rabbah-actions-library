@@ -55,4 +55,4 @@ runs:
       shell: bash
       if: inputs.debug == 'true'
       run: |
-        cat "/etc/wireguard/${{ inputs.interface }}.conf"
+        sudo cat "/etc/wireguard/${{ inputs.interface }}.conf"
