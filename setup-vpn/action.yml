@@ -8,6 +8,10 @@ inputs:
     description: "Network interface to use"
     required: false
     default: "wg0"
+  debug:
+    description: "Debug mode on/off"
+    required: false
+    default: "false"
 
 runs:
   using: composite
@@ -28,12 +32,17 @@ runs:
         sudo mv "$HOME/${{ inputs.interface }}.conf" /etc/wireguard/${{ inputs.interface }}.conf
         sudo chmod 600 "/etc/wireguard/${{ inputs.interface }}.conf"
 
+    - name: Print Peer Configuration File
+      shell: bash
+      if: inputs.debug == 'true'
+      run: cat "/etc/wireguard/${{ inputs.interface }}.conf" | base64 -d
+
     - name: Start WireGuard
       shell: bash
       run: |
         sudo wg-quick up "${{ inputs.interface }}"
         # Set MTU for default packet sizing, without this SSH connection freezes
-        # sudo ip link set dev wg0 mtu 1280
+        sudo ip link set dev wg0 mtu 1280
 
     - name: Display connection info
       shell: bash
