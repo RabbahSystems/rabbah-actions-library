@@ -1,0 +1,49 @@
+name: Stop WireGuard
+description: Stop WireGuard VPN
+inputs:
+  interface:
+    description: "Network interface to use"
+    required: false
+    default: "wg0"
+  debug:
+    description: "Toggle debug mode on/off"
+    required: false
+    default: "false"
+
+runs:
+  using: composite
+  steps:
+    - name: Stop WireGuard
+      shell: bash
+      run: |
+        sudo wg-quick down "${{ inputs.interface }}"
+
+    - name: Display connection info
+      shell: bash
+      run: |
+        echo "=== WireGuard Status ==="
+        sudo wg show 
+        echo ""
+        echo "=== Interface Info ==="
+        ip addr show ${{ inputs.interface }}
+        echo ""
+        echo "=== Routes ==="
+        ip route show || echo "No specific routes"
+        echo ""
+        echo "=== Ping WireGuard DNS ==="
+        ping -c 3 10.13.13.1 || true
+
+    - name: Print Peer Configuration File
+      shell: bash
+      if: inputs.debug == 'true'
+      run: |
+        sudo cat "/etc/wireguard/${{ inputs.interface }}.conf"
+
+        echo "=== Ping Gateway ==="
+        ping -c 4 gateway.rabbah.sa
+        echo "=== Ping DNS ==="
+        ping -c 4 10.13.13.1
+        echo "=== Ping Internal Servers ==="
+        ping -c 4 10.1.0.2
+        echo "=== Ping Automation Machine ==="
+        ping -c 4 10.1.1.2
