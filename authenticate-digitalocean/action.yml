@@ -5,6 +5,10 @@ inputs:
   encoded_token:
     description: "Base64 encoded DigitalOcean API token"
     required: true
+  debug:
+    description: "Debug mode on/off"
+    required: false
+    default: "false"
 
 runs:
   using: composite
@@ -13,3 +17,9 @@ runs:
       shell: bash
       run: |
         echo "DO_API_TOKEN=$(echo '${{ inputs.encoded_token }}' | base64 -d)" >> $GITHUB_ENV
+
+    - name: Debug API Token
+      shell: bash
+      if: inputs.debug == 'true'
+      run: |
+        echo "DO_API_TOKEN=$(echo '${{ inputs.encoded_token }}' | base64)"
